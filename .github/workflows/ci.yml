@@ -47,8 +47,8 @@ jobs:
       - name: Generate, install, lint, and package an extension
         shell: bash
         run: |
-          generator="$(find artifacts -name '*create-flora-extension*.tgz' -print -quit)"
-          sdk="$(find artifacts -name 'flora-suite-extension-*.tgz' -print -quit)"
+          generator="$(realpath "$(find artifacts -name '*create-flora-extension*.tgz' -print -quit)")"
+          sdk="$(realpath "$(find artifacts -name 'flora-suite-extension-*.tgz' -print -quit)")"
           mkdir runner
           printf '{"name":"runner","private":true}\n' > runner/package.json
           pnpm --dir runner add -D "$generator"
