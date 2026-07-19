@@ -1,6 +1,6 @@
 # monaco-editor-example
 
-This is a simple [Foxglove](http://foxglove.dev/) [extension panel](https://docs.foxglove.dev/docs/visualization/extensions/api/panel) that demonstrates
+This is a simple [Flora](https://github.com/flora-suite/create-flora-extension) [extension panel](https://github.com/flora-suite/create-flora-extension) that demonstrates
 embedding the [Monaco Editor](https://microsoft.github.io/monaco-editor/) in a custom panel.
 
 Note that this uses the [Monaco React](https://github.com/suren-atoyan/monaco-react) wrapper which

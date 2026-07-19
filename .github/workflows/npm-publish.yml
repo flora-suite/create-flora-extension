@@ -1,30 +1,27 @@
-name: Publish
+name: Publish packages
 
 on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      # https://docs.npmjs.com/generating-provenance-statements#publishing-packages-with-provenance-via-github-actions
-      id-token: write
-
+  publish:
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          lfs: true
-      - name: Configure Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22.x
           registry-url: https://registry.npmjs.org/
-
+          cache: pnpm
       - run: corepack enable
-
-      - run: yarn install --immutable
-      - run: yarn npm publish --access public --provenance
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm --filter @flora-suite/extension publish --access public --provenance --no-git-checks
+      - run: pnpm --filter @flora-suite/schemas publish --access public --provenance --no-git-checks
+      - run: pnpm --filter @flora-suite/create-flora-extension publish --access public --provenance --no-git-checks

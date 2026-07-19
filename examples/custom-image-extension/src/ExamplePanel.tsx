@@ -1,5 +1,5 @@
-import { PanelExtensionContext, Topic, MessageEvent } from "@foxglove/extension";
-import { CompressedImage } from "@foxglove/schemas";
+import { PanelExtensionContext, Topic, MessageEvent } from "@flora-suite/extension";
+import { CompressedImage } from "@flora-suite/schemas";
 import { useLayoutEffect, useEffect, useState, useRef, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 

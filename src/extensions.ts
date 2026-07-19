@@ -7,11 +7,11 @@ export type ExtensionPackageJson = { name: string; version: string; publisher?: 
 /**
  * Returns a unique identifier for an extension based on the publisher and package name. The
  * publisher can either be explicitly specified with a "publisher" field or extracted from the
- * "name" field if it contains a namespace such as "@foxglove".
+ * "name" field if it contains a namespace such as "@flora-suite".
  *
  * This method will throw if any required fields are missing or invalid.
  * @param pkgJson Parsed package.json file
- * @returns An identifier string such as "foxglove.studio-extension-turtlesim"
+ * @returns An identifier string such as "flora-suite.studio-extension-turtlesim"
  */
 export function getPackageId(pkgJson: ExtensionPackageJson): string {
   if (typeof pkgJson.name !== "string") {
@@ -39,7 +39,7 @@ export function getPackageId(pkgJson: ExtensionPackageJson): string {
 /**
  * Get the directory name to use for an installed extension
  * @param pkgJson Parsed package.json file
- * @returns A directory name such as "foxglove.studio-extension-turtlesim-1.0.0"
+ * @returns A directory name such as "flora-suite.studio-extension-turtlesim-1.0.0"
  */
 export function getPackageDirname(pkgJson: ExtensionPackageJson): string {
   const pkgId = getPackageId(pkgJson);
@@ -51,7 +51,7 @@ export function getPackageDirname(pkgJson: ExtensionPackageJson): string {
 }
 
 /**
- * Separate a package.json "name" field into separate namespace (i.e. @foxglove) and name fields
+ * Separate a package.json "name" field into separate namespace (for example @flora-suite) and name fields
  * @param name The "name" field from a package.json file
  * @returns An object containing the unprefixed name and the namespace, if present
  */
@@ -60,5 +60,5 @@ export function parsePackageName(name: string): { namespace?: string; name: stri
   if (res == undefined) {
     return { name };
   }
-  return { namespace: res[1], name: res[2]! };
+  return { namespace: res[1], name: res[2] };
 }

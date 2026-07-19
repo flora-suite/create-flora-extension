@@ -2,90 +2,62 @@ name: CI
 
 on:
   push:
-    branches: main
-    tags: v*
+    branches: [main]
+    tags: ["v*"]
   pull_request:
-    branches: "*"
 
 jobs:
-  lint:
+  verify:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4.2.2
-
-      - run: corepack enable
-
-      - name: Configure Node.js
-        uses: actions/setup-node@v4.1.0
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20.x
-          cache: yarn
-
-      - run: yarn install --immutable
-      - run: yarn run tsc --noEmit # typecheck files that are not included by webpack or package builds
-      - run: yarn lint:ci
-
-  test:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4.2.2
-
+          node-version: 22.x
+          cache: pnpm
       - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm lint:ci
+      - run: pnpm test --maxWorkers=100%
 
-      - name: Configure Node.js
-        uses: actions/setup-node@v4.1.0
-        with:
-          node-version: 20.x
-          cache: yarn
-
-      - run: yarn install --immutable
-      - name: test
-        run: yarn run test --maxWorkers=100%
-
-  e2e:
+  generated-project:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-22.04
-          - windows-2022
-
-    name: e2e (${{ matrix.os }})
-
+        os: [ubuntu-24.04, windows-2022]
     steps:
-      - uses: actions/checkout@v4.2.2
-
-      # On windows we need to run `corepack enable` after setup-node and on linux we need
-      # to run it before. On linux it is ok to run it after as well.
-      - run: corepack enable
-        if: matrix.os == 'windows-2022'
-
-      - name: Configure Node.js
-        uses: actions/setup-node@v4.1.0
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20.x
-
+          node-version: 22.x
+          cache: pnpm
       - run: corepack enable
-
-      - run: yarn install --immutable
-
-      # pack into tarball so we can use it with npx
-      - run: yarn pack
-
-      - name: create sample extension
-        run: npx package.tgz sample
-
-      # install local package.tgz to use the foxglove-scripts from this build
-      - run: npm install ../package.tgz
-        working-directory: sample
-
-      # confirm that the generated extension code passes lint
-      - name: lint generated extension code
-        working-directory: sample
-        run: npm run lint
-
-      # confirm that the generated extension code can be packaged
-      - name: package generated extension
-        working-directory: sample
-        run: npm run package
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Pack local SDK and generator
+        shell: bash
+        run: |
+          mkdir artifacts
+          pnpm --filter @flora-suite/extension pack --pack-destination artifacts
+          pnpm --filter @flora-suite/create-flora-extension pack --pack-destination artifacts
+      - name: Generate, install, lint, and package an extension
+        shell: bash
+        run: |
+          generator="$(realpath "$(find artifacts -name '*create-flora-extension*.tgz' -print -quit)")"
+          sdk="$(realpath "$(find artifacts -name 'flora-suite-extension-*.tgz' -print -quit)")"
+          mkdir runner
+          printf '{"name":"runner","private":true}\n' > runner/package.json
+          pnpm --dir runner add -D "$generator"
+          pnpm --dir runner exec create-flora-extension sample --skip-install
+          pnpm --dir runner/sample add -D \
+            "$generator" "$sdk" \
+            @types/react@^18 @types/react-dom@^18 \
+            css-loader@^7 eslint@^9 globals@^15 prettier@^3 react@^18 react-dom@^18 \
+            style-loader@^4 ts-loader@^9 \
+            typescript@^5 typescript-eslint@^8
+          pnpm --dir runner/sample run lint
+          pnpm --dir runner/sample run package

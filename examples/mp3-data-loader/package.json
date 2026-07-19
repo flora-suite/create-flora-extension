@@ -2,32 +2,33 @@
   "name": "mp3-data-loader",
   "displayName": "MP3 Data Loader",
   "description": "",
-  "publisher": "Foxglove",
+  "publisher": "flora-suite",
   "version": "1.0.0",
   "license": "MIT",
   "main": "./dist/extension.js",
   "scripts": {
-    "build": "npm run build:wasm && foxglove-extension build",
-    "build:wasm": "cd rust && cargo build --release --target wasm32-unknown-unknown",
-    "foxglove:prepublish": "npm run build:wasm && foxglove-extension build --mode production",
+    "build": "pnpm build:wasm && flora-extension build",
+    "build:wasm": "cd rust && cargo +1.85.0 build --release --target wasm32-unknown-unknown",
+    "flora:prepublish": "pnpm build:wasm && flora-extension build --mode production",
     "lint:ci": "eslint --report-unused-disable-directives .",
     "lint": "eslint --report-unused-disable-directives --fix .",
-    "local-install": "foxglove-extension install",
-    "package": "foxglove-extension package",
-    "pretest": "foxglove-extension pretest"
+    "local-install": "flora-extension install",
+    "package": "flora-extension package",
+    "pretest": "flora-extension build --mode production"
   },
   "devDependencies": {
-    "@foxglove/eslint-plugin": "2.0.0",
-    "@foxglove/extension": "2.40.0",
-    "@foxglove/schemas": "1.6.4",
+    "@flora-suite/extension": "workspace:*",
+    "@flora-suite/schemas": "workspace:*",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
     "@types/wicg-file-system-access": "2023.10.6",
-    "create-foxglove-extension": "1.0.6",
+    "@flora-suite/create-flora-extension": "workspace:*",
     "eslint": "9.15.0",
     "prettier": "3.3.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "typescript": "5.7.2"
+    "typescript": "5.7.2",
+    "globals": "15.15.0",
+    "typescript-eslint": "8.48.1"
   }
 }

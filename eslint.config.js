@@ -1,13 +1,13 @@
 // @ts-check
 
-const foxglove = require("@foxglove/eslint-plugin");
 const globals = require("globals");
 const tseslint = require("typescript-eslint");
 
-module.exports = tseslint.config({
-  ignores: ["dist/**", "examples/**", "template/**"],
+module.exports = tseslint.config(
+  { ignores: ["dist/**", "examples/**", "template/**"] },
+  {
   files: ["src/**/*.ts", "src/**/*.tsx"],
-  extends: [foxglove.configs.base, foxglove.configs.jest, foxglove.configs.typescript],
+  extends: [tseslint.configs.recommendedTypeChecked],
   languageOptions: {
     globals: {
       ...globals.node,
@@ -17,4 +17,5 @@ module.exports = tseslint.config({
       tsconfigRootDir: __dirname,
     },
   },
-});
+  },
+);

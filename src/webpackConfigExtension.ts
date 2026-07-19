@@ -31,7 +31,7 @@ export default (
     // and a single inline map yields cleaner stack traces in error reports.
     devtool: isDev ? "eval-source-map" : "inline-source-map",
     externals: {
-      "@foxglove/extension": "@foxglove/extension",
+      "@flora-suite/extension": "@flora-suite/extension",
     },
     resolve: {
       extensions: [".js", ".ts", ".jsx", ".tsx"],

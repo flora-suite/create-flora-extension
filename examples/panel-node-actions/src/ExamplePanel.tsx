@@ -4,7 +4,7 @@ import {
   Topic,
   SettingsTreeAction,
   SettingsTreeNode,
-} from "@foxglove/extension";
+} from "@flora-suite/extension";
 import { produce } from "immer";
 import { useEffect, useLayoutEffect, useState, useCallback, ReactElement } from "react";
 import { createRoot } from "react-dom/client";

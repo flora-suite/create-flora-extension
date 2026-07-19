@@ -21,7 +21,7 @@ import { info, error } from "./log";
 const cpR = promisify(ncp);
 
 // A fixed date is used for zip file modification timestamps to
-// produce deterministic .foxe files. Foxglove birthday.
+// produce deterministic .foxe files. Flora project epoch.
 const MOD_DATE = new Date("2021-02-03");
 
 export interface PackageManifest {
@@ -38,7 +38,7 @@ export interface PackageManifest {
   main: string;
   files?: string[];
   scripts?: {
-    "foxglove:prepublish"?: string;
+    "flora:prepublish"?: string;
   };
 }
 
@@ -141,7 +141,14 @@ export async function publishCommand(options: PublishOptions): Promise<void> {
   }
 
   // Fetch the .foxe file and compute the SHA256 hash
-  const res = await fetch(foxeUrl);
+  const url = new URL(foxeUrl);
+  if (url.protocol !== "https:") {
+    throw new Error(`--foxe must be an HTTPS URL`);
+  }
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Failed to download ${foxeUrl}: ${res.status} ${res.statusText}`);
+  }
   const foxeData = await res.arrayBuffer();
   const hash = createHash("sha256");
   const sha256sum = hash.update(new Uint8Array(foxeData)).digest("hex");
@@ -199,19 +206,19 @@ async function readManifest(extensionPath: string): Promise<PackageManifest> {
 }
 
 async function prepublish(extensionPath: string, pkg: PackageManifest): Promise<void> {
-  const script = pkg.scripts?.["foxglove:prepublish"];
+  const script = pkg.scripts?.["flora:prepublish"];
   if (script == undefined) {
     return;
   }
 
-  info(`Executing prepublish script 'npm run foxglove:prepublish'...`);
+  info(`Executing prepublish script 'pnpm run flora:prepublish'...`);
 
   await new Promise<void>((resolve, reject) => {
-    const tool = "npm";
+    const tool = "pnpm";
     const cwd = extensionPath;
-    const child = spawn(tool, ["run", "foxglove:prepublish"], {
+    const child = spawn(tool, ["run", "flora:prepublish"], {
       cwd,
-      shell: true,
+      shell: process.platform === "win32",
       stdio: "inherit",
     });
     child.on("exit", (code) => {
@@ -296,33 +303,17 @@ async function install(
   const dirName = getPackageDirname(pkg);
   const id = getPackageId(pkg);
 
-  // The snap package does not use the regular _home_ directory but instead uses a separate snap
-  // application directory to limit filesystem access.
-  //
-  // We look for this app directory as a signal that the user installed the snap package rather than
-  // the deb package. If we detect a snap installation directory, we install to the snap path and
-  // exit.
-  const snapAppDir = join(homedir(), "snap", "foxglove-studio", "current");
-  if (await isDirectory(snapAppDir)) {
-    info(`Detected snap install at ${snapAppDir}`);
-    await removeExtensionsById({
-      id,
-      rootFolder: join(snapAppDir, ".foxglove-studio", "extensions"),
-    });
-
-    const extensionDir = join(snapAppDir, ".foxglove-studio", "extensions", dirName);
-    await copyFiles(files, extensionDir);
-    return;
-  }
-
   await removeExtensionsById({
     id,
-    rootFolder: join(homedir(), ".foxglove-studio", "extensions"),
+    rootFolder: floraExtensionRoot(),
   });
 
-  // If there is no snap install present then we install to the home directory
-  const defaultExtensionDir = join(homedir(), ".foxglove-studio", "extensions", dirName);
+  const defaultExtensionDir = join(floraExtensionRoot(), dirName);
   await copyFiles(files, defaultExtensionDir);
+}
+
+function floraExtensionRoot(): string {
+  return process.env.FLORA_EXTENSIONS_DIR ?? join(homedir(), ".flora", "extensions");
 }
 
 // Remove previous extensions by id. There could be multiple extensions with a matching ID on
@@ -448,7 +439,7 @@ async function githubRawFile(homepage: string, filename: string): Promise<string
     return undefined;
   }
 
-  const [_, org, project] = match;
+  const [, org, project] = match;
   if (org == undefined || project == undefined) {
     return undefined;
   }
