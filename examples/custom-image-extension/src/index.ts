@@ -1,10 +1,10 @@
-import { ExtensionContext } from "@foxglove/extension";
+import { ExtensionContext } from "@flora-suite/extension";
 
 import { initExamplePanel } from "./ExamplePanel";
 
 export function activate(extensionContext: ExtensionContext): void {
   extensionContext.registerPanel({
-    name: "Foxglove Example Image Extension Panel",
+    name: "Flora Example Image Extension Panel",
     initPanel: initExamplePanel,
   });
 }

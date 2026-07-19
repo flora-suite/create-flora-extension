@@ -1,25 +1,26 @@
-# ndjson foxglove data loader example
+# ndjson flora data loader example
 
-## A Foxglove Data Loader
+## A Flora Data Loader
 
-This is a simple [Foxglove](http://foxglove.dev/) [extension](https://docs.foxglove.dev/docs/visualization/extensions/) that demonstrates loading a custom file format.
+This is a simple [Flora](https://github.com/flora-suite/create-flora-extension) [extension](https://github.com/flora-suite/create-flora-extension) that demonstrates loading a custom file format.
 
 ---
 
 Install rust with [rustup](https://www.rust-lang.org/tools/install), then install wasm32 support:
 
 ```
-rustup target add wasm32-unknown-unknown
+rustup toolchain install 1.85.0
+rustup target add wasm32-unknown-unknown --toolchain 1.85.0
 ```
 
 Then to build the rust code and generate the extension file:
 
 ```
-npm install
-npm run package
+pnpm install
+pnpm package
 ```
 
-These steps will produce a `.foxe` file you can install as an extension from the Foxglove settings page.
+These steps will produce a `.foxe` file you can install as an extension from the Flora settings page.
 
 Once you have installed this extension, you can load files with a `.ndjson` extension such as the
 `example.ndjson` file included in this directory.

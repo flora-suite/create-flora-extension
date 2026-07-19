@@ -1,116 +1,63 @@
-# create-foxglove-extension
+# @flora-suite/create-flora-extension
 
-[![npm version](https://img.shields.io/npm/v/create-foxglove-extension.svg?style=flat)](https://www.npmjs.com/package/create-foxglove-extension)
+Create, build, package, locally install, and publish Flora extensions.
 
-## Introduction
+## Quick start
 
-[Foxglove](https://foxglove.dev) allows developers to create
-[extensions](https://docs.foxglove.dev/docs/visualization/extensions/introduction), or custom code
-that is loaded and executed inside the Foxglove application. Extensions are authored in TypeScript
-using the `@foxglove/extension` SDK.
-
-## Creating Your First Extension
-
-Make sure you have [Node.js](https://nodejs.org/) 14 or newer installed. In a terminal, go
-into the directory where you keep source code (ex: `cd ~/Code`) and run the following
-command:
+Flora extensions require Node.js 22+ and pnpm 10+.
 
 ```sh
-npm init foxglove-extension@latest helloworld
+pnpm dlx @flora-suite/create-flora-extension my-panel
+cd my-panel
+pnpm install
+pnpm local-install
 ```
 
-Feel free to choose an extension name other than _helloworld_. Otherwise, this will create
-a folder named _helloworld_ containing your extension. Run a one-time initialization step:
+`local-install` copies the built extension to `~/.flora/extensions`. Set
+`FLORA_EXTENSIONS_DIR` to use an isolated directory in CI or local testing.
+
+## Generated project commands
 
 ```sh
-cd helloworld
-npm install
+pnpm build          # development bundle
+pnpm local-install  # production bundle and install into Flora
+pnpm package        # create a .foxe archive
+pnpm lint
+pnpm test
 ```
 
-This installs all of the dependencies needed to edit and build the extension. You can use
-any editor to work on this project, although [VSCode](https://code.visualstudio.com/) is
-the best supported IDE for authoring Foxglove extensions. Look at the files
-`src/index.ts` and `src/ExamplePanel.tsx` for a simple example of creating a React element
-and registering it as a custom panel. To build and install this extension into your local
-Foxglove extensions folder, run:
+Generated extensions use the stable public APIs from `@flora-suite/extension`. The archive format
+is `.foxe` for compatibility with the Flora desktop loader.
+
+## Publish an extension
+
+Build and upload a release asset first, then generate verified marketplace metadata:
 
 ```sh
-npm run local-install
+pnpm flora-extension publish \
+  --foxe https://github.com/flora-suite/flora-extension-marktplace/releases/download/<tag>/<asset>.foxe
 ```
 
-This should create a folder under your home directory such as
-`~/.foxglove-studio/extensions/unknown.helloworld-0.0.0` containing your compiled
-extension. Start Foxglove. If everything succeeded, you should be able to add a new
-panel in Foxglove named _"ExamplePanel"_. Each time you make a change to your
-extension, you will need to run `npm run local-install` again to build it and copy the
-build output to the Foxglove extensions folder in your home directory. You can
-either reload Foxglove or close and reopen it to load your latest extension code.
+The command requires HTTPS and a successful download before calculating SHA-256. Commit the output
+with the extension source in [flora-extension-marktplace](https://github.com/flora-suite/flora-extension-marktplace).
 
-If you just want to confirm your code compiles without installing it locally, run `npm run build`.
+## Development
 
-You can customize the build and install process by editing your `./config.ts` file. The
-config file should look something like this:
-
-```typescript
-module.exports = {
-  webpack: (config) => {
-    config.module.rules.push({
-      test: /\.css$/i,
-      use: ["style-loader", "css-loader"],
-    });
-    return config;
-  },
-};
-```
-
-## Publishing Your Extension
-
-All of the metadata for your extension is contained in the _package.json_ file. Before
-publishing, make sure you have set `name`, `publisher`, `version`, and `description`. When
-you are ready to distribute your extension, run:
+This repository is a pnpm workspace containing the generator and the public SDK packages.
 
 ```sh
-npm run package
+corepack enable
+pnpm install --frozen-lockfile
+pnpm build
+pnpm lint:ci
+pnpm test
 ```
 
-This will produce a _.foxe_ file such as `helloworld-0.0.0.foxe`. This is essentially a
-ZIP archive containing your extension manifest and compiled code that can be opened by the
-Foxglove application, which will unpack it and install it to the
-`~/.foxglove-studio/extensions` folder. Stay tuned for future instructions on how to
-publish Foxglove extensions to a registry so other users can easily search for and
-install your extension.
+The `examples/` directory covers panels, message conversion, topic aliasing, web workers, and data
+loaders. Each example is maintained as Flora source code, not as an external fork.
 
-## Examples
+## Release
 
-You can find examples of different kinds of extensions in the `./examples` directory.
-
-## Stay in touch
-
-Join our [Discord](https://foxglove.dev/chat) to ask questions, share
-feedback, and stay up to date on what our team is working on.
-
-## Developer information
-
-Information on developing `create-foxglove-extension` itself.
-
-### Build and Run Locally
-
-Build the `create-foxglove-extension` package locally with:
-
-```bash
-npm pack
-```
-
-Run the extension generator:
-
-```bash
- npx create-foxglove-extension-{VERSION}.tgz example-extension-name
-```
-
-### Release process
-
-1. Bump the version in package.json, and merge to main
-2. [Create a new release](https://github.com/foxglove/create-foxglove-extension/releases/new)
-3. Create a tag for the version above, with a leading "v" (`v0.0.0`)
-4. Generate release notes
-5. Publish the release
+Release `@flora-suite/extension`, `@flora-suite/schemas`, and
+`@flora-suite/create-flora-extension` from a reviewed GitHub Release. The publish workflow uses
+npm provenance and public access for the `@flora-suite` scope.

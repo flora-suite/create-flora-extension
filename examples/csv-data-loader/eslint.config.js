@@ -1,12 +1,11 @@
 // @ts-check
 
-const foxglove = require("@foxglove/eslint-plugin");
 const globals = require("globals");
 const tseslint = require("typescript-eslint");
 
 module.exports = tseslint.config({
   files: ["src/**/*.ts", "src/**/*.tsx"],
-  extends: [foxglove.configs.base, foxglove.configs.react, foxglove.configs.typescript],
+  extends: [tseslint.configs.recommendedTypeChecked],
   languageOptions: {
     globals: {
       ...globals.es2020,
@@ -18,6 +17,5 @@ module.exports = tseslint.config({
     },
   },
   rules: {
-    "react-hooks/exhaustive-deps": "error",
   },
 });

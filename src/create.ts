@@ -9,22 +9,27 @@ import * as tar from "tar";
 import { info } from "./log";
 
 const DEPENDENCIES = [
-  "@foxglove/eslint-plugin@^2",
-  "@foxglove/extension@^2",
+  "@flora-suite/extension@^0.1.0",
   "@types/react@^18",
   "@types/react-dom@^18",
-  "create-foxglove-extension@^1",
+  "@flora-suite/create-flora-extension@^0.1.0",
   "eslint@^9",
+  "globals@^15",
   "prettier@^3",
   "react@^18",
   "react-dom@^18",
+  "css-loader@^7",
+  "style-loader@^4",
+  "ts-loader@^9",
   "typescript@^5",
+  "typescript-eslint@^8",
 ];
 
 export interface CreateOptions {
   readonly name: string;
   readonly cwd?: string;
   readonly dirname?: string;
+  readonly installDependencies?: boolean;
 }
 
 export async function createCommand(options: CreateOptions): Promise<void> {
@@ -59,9 +64,11 @@ export async function createCommand(options: CreateOptions): Promise<void> {
       await copyTemplateFile(srcFile, dstFile, replacements);
     }
 
-    await installDependencies(extensionDir, DEPENDENCIES);
+    if (options.installDependencies ?? true) {
+      await installDependencies(extensionDir, DEPENDENCIES);
+    }
 
-    info(`Created Foxglove extension "${name}" at ${extensionDir}`);
+    info(`Created Flora extension "${name}" at ${extensionDir}`);
   } finally {
     if (tempDir) {
       await rm(tempDir, { recursive: true, force: true });
@@ -84,6 +91,11 @@ async function listFiles(baseDir: string, curDir?: string): Promise<string[]> {
   const curOrBaseDir = curDir ?? baseDir;
   const contents = await readdir(curOrBaseDir, { withFileTypes: true });
   for (const entry of contents) {
+    // macOS may materialize Finder metadata as AppleDouble files while extracting archives.
+    // They are not project source and must never be copied into a generated extension.
+    if (entry.name === ".DS_Store" || entry.name.startsWith("._")) {
+      continue;
+    }
     if (entry.isDirectory()) {
       output = output.concat(await listFiles(baseDir, path.join(curOrBaseDir, entry.name)));
     } else if (entry.isFile()) {
@@ -110,20 +122,23 @@ async function copyTemplateFile(
 }
 
 async function installDependencies(extensionDir: string, deps: string[]): Promise<void> {
-  const command = "npm";
-  const args = ["install", "--save-exact", "--save-dev", ...deps];
+  const command = "pnpm";
+  // `pnpm add` records the generator's toolchain in package.json. `pnpm install` only
+  // installs dependencies that are already declared and silently leaves a new project
+  // without its development dependencies.
+  const args = ["add", "--save-exact", "--save-dev", ...deps];
 
   info(`${command} ${args.join(" ")}`);
   await new Promise<void>((resolve, reject) => {
     const child = spawn(command, args, {
-      shell: true,
+      shell: process.platform === "win32",
       stdio: "inherit",
       cwd: extensionDir,
       env: { ...process.env },
     });
     child.on("close", (code) => {
       if (code !== 0) {
-        reject(new Error(`npm exited with code ${code ?? "<null>"}`));
+        reject(new Error(`pnpm exited with code ${code ?? "<null>"}`));
         return;
       }
       resolve();

@@ -1,4 +1,4 @@
-import { ExtensionContext, PanelExtensionContext } from "@foxglove/extension";
+import { ExtensionContext, PanelExtensionContext } from "@flora-suite/extension";
 
 import PanelWorker from "./Panel.worker";
 

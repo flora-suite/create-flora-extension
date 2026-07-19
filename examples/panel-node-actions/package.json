@@ -1,33 +1,34 @@
 {
   "name": "panel-node-actions",
-  "displayName": "Foxglove Panel Node Actions Example",
+  "displayName": "Flora Panel Node Actions Example",
   "description": "This is an example demonstrating the use of perform-node-action in panel settings.",
-  "publisher": "foxglove",
+  "publisher": "flora-suite",
   "homepage": "",
   "version": "1.0.0",
   "license": "UNLICENSED",
   "main": "./dist/extension.js",
   "keywords": [],
   "scripts": {
-    "build": "foxglove-extension build",
-    "foxglove:prepublish": "foxglove-extension build --mode production",
+    "build": "flora-extension build",
+    "flora:prepublish": "flora-extension build --mode production",
     "lint:ci": "eslint --report-unused-disable-directives .",
     "lint": "eslint --report-unused-disable-directives --fix .",
-    "local-install": "foxglove-extension install",
-    "package": "foxglove-extension package",
-    "pretest": "foxglove-extension pretest"
+    "local-install": "flora-extension install",
+    "package": "flora-extension package",
+    "pretest": "flora-extension build --mode production"
   },
   "devDependencies": {
-    "@foxglove/eslint-plugin": "2.1.0",
-    "@foxglove/extension": "2.41.0",
+    "@flora-suite/extension": "workspace:*",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
-    "create-foxglove-extension": "1.1.2",
+    "@flora-suite/create-flora-extension": "workspace:*",
     "eslint": "9.39.1",
     "immer": "11.0.1",
     "prettier": "3.7.3",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "globals": "15.15.0",
+    "typescript-eslint": "8.48.1"
   }
 }

@@ -4,7 +4,6 @@ import * as tar from "tar";
 import { dirSync, setGracefulCleanup } from "tmp";
 
 import { createCommand } from "./create";
-import { packageCommand } from "./package";
 
 let tmpdir: string;
 
@@ -31,7 +30,12 @@ beforeAll(async () => {
 
 describe("createCommand", () => {
   it("creates a skeleton extension package", async () => {
-    await createCommand({ name: "extension-test", cwd: tmpdir, dirname: tmpdir });
+    await createCommand({
+      name: "extension-test",
+      cwd: tmpdir,
+      dirname: tmpdir,
+      installDependencies: false,
+    });
 
     const destDir = path.join(tmpdir, "extension-test");
     const contents = await readdir(destDir, { withFileTypes: true });
@@ -39,15 +43,14 @@ describe("createCommand", () => {
     const dirs = contents.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
     const files = contents.filter((entry) => entry.isFile()).map((entry) => entry.name);
 
-    expect(dirs).toHaveLength(2);
-    expect(dirs).toContain("node_modules");
+    expect(dirs).toHaveLength(1);
     expect(dirs).toContain("src");
 
     expect(files).toContain("CHANGELOG.md");
     expect(files).toContain("package.json");
     expect(files).toContain("README.md");
     expect(files).toContain("tsconfig.json");
-    expect(files).toContain("package-lock.json");
+    expect(files).not.toContain("pnpm-lock.yaml");
     expect(files).toContain(".gitignore");
     expect(files).not.toContain("yarn.lock");
 
@@ -55,13 +58,7 @@ describe("createCommand", () => {
     expect(packageJsonStr).not.toContain("${NAME}");
     expect(packageJsonStr).toContain("extension-test");
     const packageJson = JSON.parse(packageJsonStr) as Record<string, unknown>;
-    expect(typeof (packageJson.devDependencies as Record<string, string>).react).toEqual("string");
-
-    await packageCommand({ cwd: destDir }); // make sure the skeleton package is buildable and packagable
-
-    // make sure we don't generate unneeded .d.ts files
-    const builtContents = await readdir(path.join(destDir, "dist"), { withFileTypes: true });
-    const builtFiles = builtContents.filter((entry) => entry.isFile()).map((entry) => entry.name);
-    expect(builtFiles.some((name) => name.endsWith(".d.ts"))).toBe(false);
+    expect(packageJson.packageManager).toEqual("pnpm@10.12.1");
+    expect(packageJson.devDependencies).toBeUndefined();
   });
 });

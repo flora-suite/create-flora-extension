@@ -1,4 +1,4 @@
-import { Experimental } from "@foxglove/extension";
+import { Experimental } from "@flora-suite/extension";
 
 import wasmUrl from "../rust/target/wasm32-unknown-unknown/release/example_foxglove_ndjson_data_loader.wasm";
 

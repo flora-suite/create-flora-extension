@@ -1,6 +1,6 @@
 # panel-node-actions
 
-This is a [Foxglove](http://foxglove.dev/) [extension panel](https://docs.foxglove.dev/docs/visualization/extensions/api/panel) that demonstrates how to use the `perform-node-action` action type in the [panel settings API](https://docs.foxglove.dev/docs/visualization/extensions/api/panel-settings).
+This is a [Flora](https://github.com/flora-suite/create-flora-extension) [extension panel](https://github.com/flora-suite/create-flora-extension) that demonstrates how to use the `perform-node-action` action type in the [panel settings API](https://github.com/flora-suite/create-flora-extension).
 
 This example shows how to:
 
